@@ -3,12 +3,13 @@ package com.carpediem.homer.perfectitemscontainer;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.TextView;
 
 /**
  * Created by homer on 16-7-22.
  */
-public class NormalDropDownView extends View implements DropDownView {
-    
+public class NormalDropDownView extends TextView implements DropDownView {
+
     public NormalDropDownView(Context context) {
         super(context);
     }

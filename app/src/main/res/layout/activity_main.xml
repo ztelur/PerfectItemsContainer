@@ -9,8 +9,13 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.carpediem.homer.project.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <com.carpediem.homer.project.TestLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_width="100dp"
+            android:background="#00ff00"
+            android:clickable="true"
+            android:layout_height="50dp" />
+    </com.carpediem.homer.project.TestLayout>
 </RelativeLayout>
