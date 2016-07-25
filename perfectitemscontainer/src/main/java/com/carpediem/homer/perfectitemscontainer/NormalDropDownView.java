@@ -2,13 +2,15 @@ package com.carpediem.homer.perfectitemscontainer;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 /**
  * Created by homer on 16-7-22.
  */
-public class NormalDropDownView extends TextView implements DropDownView {
+public class NormalDropDownView extends TextView implements DropDownView,DropDownView.DropDownStateListener {
+
 
     public NormalDropDownView(Context context) {
         super(context);
@@ -22,6 +24,7 @@ public class NormalDropDownView extends TextView implements DropDownView {
         super(context, attrs, defStyleAttr);
     }
 
+
     private void init(Context context) {
 
     }
@@ -29,5 +32,10 @@ public class NormalDropDownView extends TextView implements DropDownView {
     @Override
     public DropDownStateListener getDropDownListener() {
         return null;
+    }
+
+    @Override
+    public void onStateChanged(int state) {
+        Log.e("test",state+"");
     }
 }

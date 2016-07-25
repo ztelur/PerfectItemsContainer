@@ -6,17 +6,26 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 
 /**
  * Created by homer on 16-7-22.
  */
 public class PerfectListView extends ListView {
+
+    int PULL_DOWN = 1;
+    int PENDING_REFRESH = 2;
+    int REFRESH = 3;
+    int DONE = 4;
     /**
      * 功能:1 上拉加载，下拉刷新
      * 功能:2 HeaderView的zoom效果
      */
-
+    private float mMaxPullDownDistance = 20;
     private View mDropView;
+    private DropDownView.DropDownStateListener mStateListener;
+
+    private int mDropDownState = DONE;
     /**
      *
      * @param context
@@ -40,6 +49,7 @@ public class PerfectListView extends ListView {
         //设置下拉刷新等view
         setClipToPadding(true);
         NormalDropDownView dropView = new NormalDropDownView(context);
+        mStateListener = dropView.getDropDownListener();
         dropView.setText("dddd");
         mDropView = dropView;
         mDropView.setPadding(0,-1*mDropView.getMeasuredHeight(),0,0);
@@ -62,19 +72,47 @@ public class PerfectListView extends ListView {
             case MotionEvent.ACTION_MOVE:
                 float y = ev.getY();
                 if (y-mLastY > 10) {
-                    Log.e("test","y is "+y);
+                    if (mDropDownState == REFRESH) {
+                        break;
+                    } else if (mDropDownState == DONE) {
+
+                    } else if (mDropDownState == PULL_DOWN) {
+
+                    } else if (mDropDownState == PENDING_REFRESH) {
+
+                    }
                     int padding = mDropView.getPaddingTop();
                     int newPaddingTop = (int)(padding + y - mLastY);
-                    mDropView.setPadding(0,newPaddingTop,0,0);
+                    if (newPaddingTop < mMaxPullDownDistance) {
+                        mDropView.setPadding(0, newPaddingTop, 0, 0);
+                    } else {
+                        mDropDownState = PENDING_REFRESH;
+                        ((TextView)mDropView).setText("释放刷新");
+                    }
                     mLastY = y;
                 }
                 break;
+            case MotionEvent.ACTION_CANCEL:
+                cancel();
+                break;
             case MotionEvent.ACTION_UP:
+
+                if (mDropDownState == PENDING_REFRESH) {
+                    mDropDownState = REFRESH;
+                    // do something
+                } else if (mDropDownState == PULL_DOWN) {
+                    //返回动画
+                }
                 break;
         }
         return super.onTouchEvent(ev);
     }
+    private void cancel() {
 
+    }
+    private void changeDropDownViewState() {
+        switch (mDropDownState) {
 
-
+        }
+    }
 }
