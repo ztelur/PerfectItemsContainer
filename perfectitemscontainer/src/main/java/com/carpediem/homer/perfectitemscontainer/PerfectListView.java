@@ -92,7 +92,9 @@ public class PerfectListView extends ListView {
     private float mLastY;
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        switch (ev.getActionMasked()) {
+        int action = ev.getActionMasked();
+
+        switch (action) {
             case MotionEvent.ACTION_DOWN:
                 ev.getY();
                 mLastY = ev.getY();
@@ -119,6 +121,9 @@ public class PerfectListView extends ListView {
         return super.onTouchEvent(ev);
     }
     private void handleMoveAction(float scrollY) {
+        if (mDropDownState == REFRESH) {
+            return;
+        }
         if (Math.abs(scrollY - mLastY) > mTouchSlop) {
             int padding = mDropView.getPaddingTop();
             int newPaddingTop = (int)(padding + scrollY - mLastY);
@@ -127,11 +132,12 @@ public class PerfectListView extends ListView {
                 mDropView.setPadding(0, newPaddingTop, 0, 0);
                 mLastY = scrollY;
             } else {
-                pendingRefresh();
+                tryPendingRefresh();
             }
         }
     }
-    private void pendingRefresh() {
+    private void tryPendingRefresh() {
+
         ((TextView)mDropView).setText("释放刷新");
         mDropDownState = PENDING_REFRESH;
         if(checkStateListener()) {
@@ -143,6 +149,7 @@ public class PerfectListView extends ListView {
             mStateListener.onRefresh();
 
         }
+        ((TextView)mDropView).setText("正在刷新");
         postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -152,7 +159,6 @@ public class PerfectListView extends ListView {
     }
     public void finishRefresh() {
         startSpringBackAnimation();
-
     }
 
     private void startSpringBackAnimation() {
@@ -174,7 +180,7 @@ public class PerfectListView extends ListView {
         animation.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-
+                finishDropDown();
             }
         });
         animation.start();
@@ -185,7 +191,7 @@ public class PerfectListView extends ListView {
             mStateListener.onFinish();
         }
         mDropDownState = DONE;
-
+        ((TextView)mDropView).setText("下拉刷新");
     }
     private void cancel() {
 
