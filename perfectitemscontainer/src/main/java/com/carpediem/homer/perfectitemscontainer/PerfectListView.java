@@ -32,7 +32,7 @@ public class PerfectListView extends ListView {
     private DropDownStateListener mStateListener;
 
     private int mDropDownState = DONE;
-
+    private boolean mIsRecord = false;
     private DropDownManager mDropDownManager;
     /**
      *
@@ -92,22 +92,25 @@ public class PerfectListView extends ListView {
     private float mLastY;
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (mDropDownState == REFRESH) {
+            return super.onTouchEvent(ev);
+        }
         int action = ev.getActionMasked();
-
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 ev.getY();
                 mLastY = ev.getY();
+                mIsRecord = true;
                 break;
             case MotionEvent.ACTION_MOVE:
                 float y = ev.getY();
                 handleMoveAction(y);
-
                 break;
             case MotionEvent.ACTION_CANCEL:
                 cancel();
                 break;
             case MotionEvent.ACTION_UP:
+                Log.e("test",mDropDownState+"");
                 if (mDropDownState == PENDING_REFRESH) {
                     mDropDownState = REFRESH;
                     processRefreshAction();
@@ -121,23 +124,23 @@ public class PerfectListView extends ListView {
         return super.onTouchEvent(ev);
     }
     private void handleMoveAction(float scrollY) {
-        if (mDropDownState == REFRESH) {
-            return;
-        }
         if (Math.abs(scrollY - mLastY) > mTouchSlop) {
             int padding = mDropView.getPaddingTop();
             int newPaddingTop = (int)(padding + scrollY - mLastY);
-            if (newPaddingTop < mMaxPullDownDistance) {
-                mDropDownState = PULL_DOWN;
-                mDropView.setPadding(0, newPaddingTop, 0, 0);
-                mLastY = scrollY;
-            } else {
+            if (newPaddingTop > mMaxPullDownDistance) {
                 tryPendingRefresh();
+            } else {
+                mDropDownState = PULL_DOWN;
             }
+            mDropView.setPadding(0, newPaddingTop, 0, 0);
+            mLastY = scrollY;
         }
     }
     private void tryPendingRefresh() {
-
+        if (mDropDownState == PENDING_REFRESH) {
+            return;
+        }
+        Log.e("test","tryPendingRefresh");
         ((TextView)mDropView).setText("释放刷新");
         mDropDownState = PENDING_REFRESH;
         if(checkStateListener()) {
@@ -145,6 +148,7 @@ public class PerfectListView extends ListView {
         }
     }
     private void processRefreshAction() {
+        Log.e("test","processRefreshAction");
         if (checkStateListener()) {
             mStateListener.onRefresh();
 
@@ -158,13 +162,19 @@ public class PerfectListView extends ListView {
         },1000);
     }
     public void finishRefresh() {
+        Log.e("test","finishRefresh");
         startSpringBackAnimation();
     }
 
     private void startSpringBackAnimation() {
+        Log.e("test","startSpringBackAnimation");
         int toValue = -1 * mDropView.getHeight();
         int fromValue = mDropView.getPaddingTop();
         if (fromValue < toValue) {
+            //数据流有问题偶，使用状态机模型应该可以查看出这种错误。
+            Log.e("test","startSpringBackAnimation return");
+            mDropDownState = DONE;
+            mIsRecord = false;
             return;
         }
 
@@ -190,6 +200,7 @@ public class PerfectListView extends ListView {
         if (checkStateListener()) {
             mStateListener.onFinish();
         }
+        Log.e("test","finishDropDown");
         mDropDownState = DONE;
         ((TextView)mDropView).setText("下拉刷新");
     }
