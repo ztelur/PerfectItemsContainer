@@ -34,6 +34,7 @@ public class PerfectListView extends ListView {
     private int mDropDownState = DONE;
     private boolean mIsRecord = false;
     private DropDownManager mDropDownManager;
+    private int mOriginDropDownViewHeight;
     /**
      *
      * @param context
@@ -61,8 +62,8 @@ public class PerfectListView extends ListView {
         dropView.setText("dddd");
         mDropView = dropView;
         measureView(dropView);
-        Log.e("test",dropView.getMeasuredHeight()+"");
-        mDropView.setPadding(0,-1*mDropView.getMeasuredHeight(),0,0);
+        mOriginDropDownViewHeight = dropView.getMeasuredHeight();
+        mDropView.setPadding(0,-1*mOriginDropDownViewHeight,0,0);
         addHeaderView(mDropView);
         //这个时候应该还乜有meausre,layout呢。
     }
@@ -92,10 +93,13 @@ public class PerfectListView extends ListView {
     private float mLastY;
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mDropDownState == REFRESH) {
+        int action = ev.getActionMasked();
+        Log.e("test",action+"");
+        boolean skipProcess = mDropDownState == REFRESH ||
+                (action != MotionEvent.ACTION_DOWN && !mIsRecord);
+        if (skipProcess) {
             return super.onTouchEvent(ev);
         }
-        int action = ev.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 ev.getY();
@@ -110,7 +114,7 @@ public class PerfectListView extends ListView {
                 cancel();
                 break;
             case MotionEvent.ACTION_UP:
-                Log.e("test",mDropDownState+"");
+                Log.e("test","action up "+mDropDownState+"");
                 if (mDropDownState == PENDING_REFRESH) {
                     mDropDownState = REFRESH;
                     processRefreshAction();
@@ -167,9 +171,10 @@ public class PerfectListView extends ListView {
     }
 
     private void startSpringBackAnimation() {
-        Log.e("test","startSpringBackAnimation");
-        int toValue = -1 * mDropView.getHeight();
+        // padding占height的，所以，你一直改变padding,导致header变大啦...
+        int toValue = -1 * mOriginDropDownViewHeight;
         int fromValue = mDropView.getPaddingTop();
+        Log.e("test","startSpringBackAnimation from "+fromValue + " to "+toValue);
         if (fromValue < toValue) {
             //数据流有问题偶，使用状态机模型应该可以查看出这种错误。
             Log.e("test","startSpringBackAnimation return");
